@@ -7,8 +7,7 @@
 # 
 # **EMAIL:** fmendoz7@asu.edu
 # 
-# **NOTE:** This Jupyter Notebook file is provided **FOR REFERENCE**
-# , as all the code was developed & successfully compiled here before conversion into a .py file
+# **NOTE:** This Jupyter Notebook file is provided **FOR REFERENCE**, as all the code was developed & successfully compiled here before conversion into a .py file
 # 
 # -------------------------------
 
@@ -47,6 +46,8 @@ import scipy.io
 import numpy as np
 import pandas as pd 
 
+import matplotlib.pyplot as plt
+get_ipython().run_line_magic('matplotlib', 'inline')
 
 #Import the relevant data using the filepath
 Numpyfile= scipy.io.loadmat('mnist_data.mat') 
@@ -63,25 +64,25 @@ trX_array = Numpyfile['trX']
 trX_array
 
 
-# In[126]:
+# In[272]:
 
 
 trY_array = Numpyfile['trY']
-#trY_array
+trY_array
 
 
-# In[127]:
+# In[280]:
 
 
 tsX_array = Numpyfile['tsX']
-#tsX_array
+tsX_array
 
 
-# In[128]:
+# In[281]:
 
 
 tsY_array = Numpyfile['tsY']
-#trY_array
+trY_array
 
 
 # In[129]:
@@ -213,26 +214,6 @@ tsX_newArray
 # ----------------
 # ## Calculate Mean, Stdev & Covariance for SEVEN (TRAINING)
 
-# In[ ]:
-
-
-#General covariance function
-def cov(a, b):
-
-    if len(a) != len(b):
-        return
-
-    a_mean = np.mean(a)
-    b_mean = np.mean(b)
-
-    sum = 0
-
-    for i in range(0, len(a)):
-        sum += ((a[i] - a_mean) * (b[i] - b_mean))
-
-    return sum/(len(a)-1)
-
-
 # In[223]:
 
 
@@ -256,7 +237,7 @@ trX_tempSTDHolder_SEVEN = []
 trX_tempMeanHolder_SEVEN = [i[0] for i in trX_newList7]
 trX_tempSTDHolder_SEVEN = [i[1] for i in trX_newList7]
 
-#(!!!) CALCULATE MEAN OF MEANS
+#(!!!) CALCULATE MEAN OF MEANS and MEAN OF STDEV
 trX_mean_SEVEN = statistics.mean(trX_tempMeanHolder_SEVEN)
 trX_std_SEVEN = statistics.mean(trX_tempSTDHolder_SEVEN)
 
@@ -308,22 +289,32 @@ tsX_calc_SEVEN
 
 # ----------------------------------------------------
 
-# In[ ]:
+# In[256]:
 
 
-#Calculate Covariance Matrix for SEVEN
+#Calculate Covariance Matrix for SEVEN. Done for MEAN OF MEANS and MEAN of STDEV
 
+#General covariance function
+def cov_trX_SEVEN(a, b):
 
-# In[ ]:
+    if len(a) != len(b):
+        return
 
+    a_mean = np.mean(a)
+    b_mean = np.mean(b)
 
-#Calculate priors
-    #TRAINING: 7 is from 0-6265 (6266 total)
-    #TRAINING: 8 is from 6266-12116 (5851 total)
-    #TRAINING: Total rows of 12116
-    
-p_SEVEN = 6266/12116
-p_EIGHT = 5851/12116
+    sum = 0
+
+    for i in range(0, len(a)):
+        sum += ((a[i] - a_mean) * (b[i] - b_mean))
+
+    return sum/(len(a)-1)
+
+trX_seven_COVARIANCE = cov_trX_SEVEN(trX_tempMeanHolder_SEVEN, trX_tempSTDHolder_SEVEN)
+
+#Pulled the original lists HOLDING the means and the standard deviations
+print("COVARIANCE trX SEVEN: " + str(cov_trX_SEVEN(trX_tempMeanHolder_SEVEN, trX_tempSTDHolder_SEVEN)))
+    #Proves that the two features are, indeed, independent
 
 
 # --------------------------------------------------------------------------------------------------
@@ -403,13 +394,36 @@ tsX_calc_EIGHT
 
 # ------------------------------------------
 
-# In[ ]:
+# In[255]:
 
 
-#Calculate Covariance Matrix for EIGHT
+#Calculate Covariance Matrix for EIGHT. Done for MEAN OF MEANS and MEAN of STDEV
+
+#General covariance function
+def cov_trX_EIGHT(a, b):
+
+    if len(a) != len(b):
+        return
+
+    #Calculated the mean of EACH feature
+    a_mean = np.mean(a)
+    b_mean = np.mean(b)
+
+    sum = 0
+
+    for i in range(0, len(a)):
+        sum += ((a[i] - a_mean) * (b[i] - b_mean))
+
+    return sum/(len(a)-1)
+
+trX_eight_COVARIANCE = cov_trX_EIGHT(trX_tempMeanHolder_EIGHT, trX_tempSTDHolder_EIGHT)
+
+#Pulled the original lists HOLDING the means and the standard deviations
+print("COVARIANCE trX EIGHT: " + str(cov_trX_EIGHT(trX_tempMeanHolder_EIGHT, trX_tempSTDHolder_EIGHT)))
+    #Proves that the two features are, indeed, independent
 
 
-# In[ ]:
+# In[259]:
 
 
 #Calculate the accuracy values 
@@ -424,6 +438,102 @@ def p_x_given_y(x, mean_y, variance_y):
     return p
 
 
+# -------------------------------------
+
+# In[372]:
+
+
+#Calculate priors from TRAINING SET
+    #TRAINING: 7 is from 0-6265 (6266 total)
+    #TRAINING: 8 is from 6266-12116 (5851 total)
+    #TRAINING: Total rows of 12116
+
+n_SEVEN = 6266
+n_EIGHT = 5851
+total_NUM = 12116
+    
+p_SEVEN = 6266/12116
+p_EIGHT = 5851/12116
+
+print("tsX MEAN OF MEANS 7: " + str(tsX_mean_SEVEN))
+print("tsX MEAN OF STDev 7: " + str(tsX_std_SEVEN))
+print(trX_calc_SEVEN)
+print()
+
+print("trX MEAN OF MEANS 8: " + str(trX_mean_EIGHT))
+print("trX MEAN OF STDev 8: " + str(trX_std_EIGHT))
+print(trX_calc_EIGHT)
+print()
+
+
+# In[351]:
+
+
+featureVector = trY_array.tolist()
+featureVectorALL = featureVector[0]
+sevenVector = featureVectorALL[0:6265]
+#sevenVector
+
+
+# In[352]:
+
+
+featureVector = trY_array.tolist()
+featureVector1 = featureVector[0]
+eightVector = featureVectorALL[6265:12116]
+eightVector
+
+
+# In[368]:
+
+
+# Calculate the Gaussian probability distribution function for x
+
+# Example of Gaussian PDF
+from math import sqrt
+from math import pi
+from math import exp
+
+trX_seven_COVARIANCE = cov_trX_SEVEN(trX_tempMeanHolder_SEVEN, trX_tempSTDHolder_SEVEN)
+trX_eight_COVARIANCE = cov_trX_EIGHT(trX_tempMeanHolder_EIGHT, trX_tempSTDHolder_EIGHT)
+
+#(!!!)MUST USE LISTS INSTEAD OF NUMPY ARRAYS
+    #Need one for 7, need one for 8
+def calculate_probability(x, mean, stdev):
+    exponent = exp(-((x-mean)**2 / (2 * stdev**2 )))
+    return (1 / (sqrt(2 * pi) * stdev)) * exponent
+
+totalLen = len(actualVector)
+print("LENGTH IS: " + str(totalLen))
+
+aCounter = 0
+bCounter = 0
+
+#Place in standard deviation to calculate probability
+for i in actualVector:
+    a = calculate_probability(i, tsX_mean_SEVEN, tsX_std_SEVEN)
+    b = calculate_probability(i, tsX_mean_EIGHT, trX_std_EIGHT)
+
+    print("SEVEN is: " + str(a))
+    print("EIGHT is: " + str(b))
+    
+    if a > b:
+        print("IT IS 7")
+        aCounter += 1
+    else:
+        print("IT IS 8")
+        bCounter += 1
+
+
+# In[371]:
+
+
+print("SEVEN PROBABILITY: " + str(aCounter/total_NUM))
+print("EIGHT PROBABILITY: " + str(bCounter/total_NUM))
+
+#Hence, because there are greater instances of seven to eight, it belongs at 7
+
+
 # # PART 3: Logistic Regression using Gradient Ascent
 # * Report classification accuracy for "7" and "8"
 # * Produce predicted label for each testing sample
@@ -433,6 +543,70 @@ def p_x_given_y(x, mean_y, variance_y):
 # * DELIVER
 #     * Predicted Labels
 #     * Classification accuracy for "7" and "8"
+
+# In[328]:
+
+
+
+
+np.random.seed(12)
+num_observations = 5000
+
+x1 = np.random.multivariate_normal([0, 0], [[1, .75],[.75, 1]], num_observations)
+x2 = np.random.multivariate_normal([1, 4], [[1, .75],[.75, 1]], num_observations)
+
+simulated_separableish_features = np.vstack((x1, x2)).astype(np.float32)
+simulated_labels = np.hstack((np.zeros(num_observations),
+                              np.ones(num_observations)))
+
+plt.figure(figsize=(12,8))
+plt.scatter(simulated_separableish_features[:, 0], simulated_separableish_features[:, 1],
+            c = simulated_labels, alpha = .4)
+
+
+# In[340]:
+
+
+def sigmoid(scores):
+    return 1 / (1 + np.exp(-scores))
+
+def log_likelihood(features, target, weights):
+    scores = np.dot(features, weights)
+    ll = np.sum( target*scores - np.log(1 + np.exp(scores)) )
+    return ll
+
+def logistic_regression(features, target, num_steps, learning_rate, add_intercept = False):
+    if add_intercept:
+        intercept = np.ones((features.shape[0], 1))
+        features = np.hstack((intercept, features))
+        
+    weights = np.zeros(features.shape[1])
+    
+    for step in range(num_steps):
+        scores = np.dot(features, weights)
+        predictions = sigmoid(scores)
+
+        # Update weights with log likelihood gradient
+        output_error_signal = target - predictions
+        
+        gradient = np.dot(features.T, output_error_signal)
+        weights += learning_rate * gradient
+
+        # Print log-likelihood every so often
+        if step % 10000 == 0:
+            print(log_likelihood(features, target, weights))
+        
+    return weights
+
+weights = logistic_regression(simulated_separableish_features, simulated_labels,
+                     num_steps = 50000, learning_rate = 5e-5, add_intercept=True)
+
+final_scores = np.dot(np.hstack((np.ones((simulated_separableish_features.shape[0], 1)),
+                                 simulated_separableish_features)), weights)
+preds = np.round(sigmoid(final_scores))
+
+print('Accuracy from scratch: {0}'.format((preds == simulated_labels).sum().astype(float) / len(preds)))
+
 
 # In[ ]:
 
